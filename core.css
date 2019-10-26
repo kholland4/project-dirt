@@ -1,0 +1,327 @@
+html {
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  width: 100%;
+  height: 100%;
+  
+  margin: 0;
+  border: 0;
+  padding: 0;
+  
+  font-size: 0;
+}
+
+#hud {
+  display: block;
+  position: fixed;
+  
+  width: 100%;
+  height: 300px;
+  
+  left: 0;
+  bottom: 0;
+  
+  background-color: white;
+}
+
+#hudTabSel {
+  display: inline-block;
+  width: 60px;
+  height: 100%;
+  
+  vertical-align: top;
+}
+
+.hudTabSel_tab {
+  display: block;
+  
+  width: calc(100% - 8px);
+  height: calc(33.3% - 14px);
+  
+  margin-left: 5px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  
+  border-left: 2px solid black;
+  border-bottom: 2px solid black;
+  border-top: 2px solid black;
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+  
+  background-color: white;
+  border-right: 1px solid black;
+}
+.hudTabSel_tab_text {
+  font-family: sans-serif;
+  font-size: 16px;
+  writing-mode: vertical-rl;
+  text-orientation: sideways;
+  transform: rotate(180deg);
+  
+  margin: auto;
+  height: 100%;
+  text-align: center;
+}
+
+.hudTabSel_tab.selected {
+  background-color: #ccc;
+  border-right: 1px solid #ccc;
+}
+
+#hudTabBox {
+  display: inline-block;
+  width: calc(100% - 60px);
+  height: 100%;
+}
+.hudTab {
+  display: inline-block;
+  width: 80%;
+  height: 100%;
+  
+  vertical-align: top;
+}
+#hudTabTile { display: inline-block; }
+#hudTabBuild { display: none; }
+#hudTabLabor { display: none; width: 100%; }
+
+.hudCol {
+  display: inline-block;
+  padding: 20px;
+  
+  font-family: sans-serif;
+  color: black;
+  
+  width: calc(25% - 40px);
+  height: calc(100% - 40px);
+  max-height: calc(100% - 40px);
+  overflow-y: auto;
+  vertical-align: top;
+}
+.hudCol_title {
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+.hudCol_items {
+
+}
+
+#hudInner {
+  height: 100%;
+}
+
+#hudTileInfo {
+  width: calc(40% - 40px);
+}
+#hudTileActions, #hudTileAC, #hudExtra {
+  width: calc(20% - 40px);
+}
+
+/*----------------*/
+
+#hudTileInfo {
+  overflow-y: auto;
+}
+
+#hudTileName {
+  display: inline-block;
+  font-size: 30px;
+}
+#hudTilePos {
+  display: inline-block;
+  margin-left: 10px;
+  font-size: 14px;
+}
+
+#hudMachineProduction {
+  display: block;
+  margin-top: 10px;
+  font-size: 14px;
+}
+#hudMachineInv {
+  display: block;
+  margin-top: 10px;
+  font-size: 14px;
+}
+.hudMachineInv_entry {}
+.hudMachineInv_entry_text { display: inline-block; margin-right: 10px; }
+.hudMachineInv_entry_button {}
+
+#hudMachineIO {
+  display: block;
+  font-size: 14px;
+  position: relative;
+  
+  margin-top: 10px;
+  padding: 50px;
+}
+#hudMachineIO_box {
+  margin: auto;
+  
+  width: 30%;
+  padding-top: 30%;
+  background-color: white;
+  border: 2px solid black;
+}
+#hudMachineIO_top {
+  position: absolute;
+  top: 0px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+#hudMachineIO_bottom {
+  position: absolute;
+  bottom: 0px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+#hudMachineIO_left {
+  position: absolute;
+  left: 0px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+#hudMachineIO_right {
+  position: absolute;
+  right: 0px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/*---*/
+
+.hudTileActions_item {
+  border: 1px solid black;
+  background-color: #fff;
+  
+  padding: 5px;
+  margin-bottom: 10px;
+}
+.hudTileActions_item.selected {
+  background-color: #bbb;
+}
+.hudTileActions_item_title {
+  font-size: 16px;
+}
+.hudTileActions_item_cost {
+  font-size: 12px;
+}
+.hudTileActions_item_costNegative { color: #c00; padding-right: 8px; }
+.hudTileActions_item_costNeutral { color: #444; padding-right: 8px; }
+.hudTileActions_item_costPositive { color: #0c0; padding-right: 8px; }
+
+/*---*/
+
+.hudTileAC_table {
+  font-size: 16px;
+}
+.hudTileAC_tr {}
+.hudTileAC_tdLeft {}
+.hudTileAC_tdRight {}
+.hudTileAC_dropdown {}
+.hudTileAC_number {}
+
+.hudTileAC_button {}
+.hudTileAC_timeCost { font-size: 14px; }
+
+/*---*/
+/*---*/
+
+#hudMaterials {
+  width: calc(20% - 40px);
+}
+
+#hudMaterials_items {
+  font-size: 16px;
+}
+
+.hudMaterials_entry {}
+.hudMaterials_entry.positive { color: #0c0; }
+.hudMaterials_entry.good { color: #00c; }
+.hudMaterials_entry.bad { color: #c00; }
+
+/*----------------*/
+
+#hudTabLabor {
+  
+}
+.hudLaborCol {
+  width: calc(20% - 40px);
+}
+
+.hudLaborItem {
+  border: 1px solid black;
+  background-color: #fff;
+  
+  padding: 5px;
+  margin-bottom: 10px;
+  
+  font-size: 16px;
+}
+.hudLaborItem::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+
+.hudLaborItem_name {
+  display: inline-block;
+  float: left;
+}
+.hudLaborItem_settings {
+  display: inline-block;
+  float: right;
+}
+
+/*------------------------------------*/
+
+#taskHUD {
+  display: block;
+  position: fixed;
+  
+  width: 300px;
+  
+  right: 0;
+  top: 0;
+}
+
+#taskHUDTitle {
+  font-family: sans-serif;
+  font-size: 16px;
+  color: black;
+}
+#taskHUDClear {
+  margin-left: 10px;
+  font-family: sans-serif;
+  font-size: 16px;
+  color: black;
+}
+#taskHUDList {
+  
+}
+
+.taskHUDItem {
+  margin: 5px;
+  border: 1px solid black;
+  padding: 5px;
+  
+  font-family: sans-serif;
+  font-size: 16px;
+  color: black;
+  
+  background-color: #aaa6;
+}
+.taskHUDItem.active { color: #050; }
+.taskHUDItem.failed { color: #600; }
+
+.taskHUDNone {
+  margin: 5px;
+  /*border: 1px solid black;*/
+  padding: 5px;
+  
+  font-family: sans-serif;
+  font-size: 16px;
+  color: black;
+}
