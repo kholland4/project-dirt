@@ -246,11 +246,40 @@ function updateHUD() {
     }
     
     //--
+  
+    var container = document.getElementById("hudMachineInv");
+    //while(container.firstChild) { container.removeChild(container.firstChild); }
+    if(tile.type.props.is_pipe) {
+      var pipeNet = tile.type.props.machine_type.tilesInNetwork(tile);
+      var reqs = [];
+      for(var i = 0; i < pipeNet.length; i++) {
+        var newReqs = pipeNet[i].tile.data.pipe_state.reqs;
+        Array.prototype.push.apply(reqs, newReqs);
+      }
+      
+      for(var i = 0; i < reqs.length; i++) {
+        var req = reqs[i];
+        
+        var entry = document.createElement("div");
+        entry.className = "hudMachineInv_entry";
+        
+        var text = document.createElement("div");
+        text.className = "hudMachineInv_entry_text";
+        text.innerText = req.material + " " + prettyTileName(req.src) + " " + req.amount.toFixed(1) + " /s --> " + prettyTileName(req.dest) + " " + (req.amount * req.falloff).toFixed(1) + " /s (" + (req.falloff * 100).toFixed(0) + "% efficiency)";
+        entry.appendChild(text);
+        
+        container.appendChild(entry);
+      }
+    }
     
     document.getElementById("hudInner").style.display = "block";
   }
   
   updateMaterialsHUD(true);
+}
+
+function prettyTileName(tile) {
+  return tile.type.printName + " (" + tile.x + ", " + tile.y + ")";
 }
 
 function updateMaterialsHUD(setColor=false) {
@@ -321,6 +350,7 @@ function updateMachineInv() {
       
       var rate = container.children[2];
       var rateVal = tile.data.machine_state.adjRates[item];
+      if(tile.data.machine_config_local.adjTransfer[item].dir == null) { rateVal = 0; }
       //if(tile.data.machine_config_local.adjTransfer[item].dir == 1) { rateVal = -rateVal; }
       if(rateVal != 0) {
         rate.innerText = tile.data.machine_config_local.adjTransfer[item].type + ": " + rateVal.toFixed(1) + " /s";
@@ -334,6 +364,37 @@ function updateMachineInv() {
         rate.className = "hudTileActions_item_costNeutral";
       }
       container.appendChild(rate);
+    }
+  }
+  
+  //---
+  //  PIPES
+  //---
+  
+  if(tile.type.props.is_pipe) {
+    var container = document.getElementById("hudMachineInv");
+    while(container.firstChild) { container.removeChild(container.firstChild); }
+    if(tile.type.props.is_pipe) {
+      var pipeNet = tile.type.props.machine_type.tilesInNetwork(tile);
+      var reqs = [];
+      for(var i = 0; i < pipeNet.length; i++) {
+        var newReqs = pipeNet[i].tile.data.pipe_state.reqs;
+        Array.prototype.push.apply(reqs, newReqs);
+      }
+      
+      for(var i = 0; i < reqs.length; i++) {
+        var req = reqs[i];
+        
+        var entry = document.createElement("div");
+        entry.className = "hudMachineInv_entry";
+        
+        var text = document.createElement("div");
+        text.className = "hudMachineInv_entry_text";
+        text.innerText = req.material + " " + prettyTileName(req.src) + " " + req.amount.toFixed(1) + " /s --> " + prettyTileName(req.dest) + " " + (req.amount * req.falloff).toFixed(1) + " /s (" + (req.falloff * 100).toFixed(0) + "% efficiency)";
+        entry.appendChild(text);
+        
+        container.appendChild(entry);
+      }
     }
   }
 }

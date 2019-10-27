@@ -250,11 +250,19 @@ function animate() {
   if(tickFrames >= 10) {
     updateMaterialsHUD();
     
+    for(var i = 0; i < activePipes.length; i++) {
+      activePipes[i].type.props.machine_type.tick1(activePipes[i], tickTime);
+    }
+    
     for(var i = 0; i < activeMachines.length; i++) {
       activeMachines[i].type.props.machine_type.tick1(activeMachines[i], tickTime);
     }
     for(var i = 0; i < activeMachines.length; i++) {
       activeMachines[i].type.props.machine_type.tick2(activeMachines[i], tickTime);
+    }
+    
+    for(var i = 0; i < activePipes.length; i++) {
+      activePipes[i].type.props.machine_type.tick2(activePipes[i], tickTime);
     }
     
     updateMachineInv();

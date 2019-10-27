@@ -16,7 +16,7 @@ function destroyPipeInstance(tile) {
 }
 
 class PipeType {
-  constructor(name, printName, tex, tile_props, props) {
+  constructor(name, printName, tex, tile_props, props, materialCategory=null) {
     this.name = name;
     this.printName = printName;
     
@@ -29,9 +29,13 @@ class PipeType {
           var adj = neighborAt(tile, side);
           //TODO: check for material type
           if(adj.type.props.is_pipe) {
-            if(adj.data.pipe_config.connections[oppositeDir(side)]) { sides[side] = 1; continue; }
+            if(adj.data.pipe_config.connections[oppositeDir(side)] && adj.type.props.machine_type == tile.type.props.machine_type) { sides[side] = 1; continue; }
           } else if(adj.type.props.is_machine) {
-            if(adj.data.machine_config_local.adjTransfer[oppositeDir(side)].dir != null) { sides[side] = 1; continue; }
+            if(adj.data.machine_config_local.adjTransfer[oppositeDir(side)].dir != null &&
+              tile.type.props.machine_type.canPassMaterial(adj.data.machine_config_local.adjTransfer[oppositeDir(side)].type)) {
+              
+              sides[side] = 1; continue;
+            }
           }
         }
         
@@ -47,7 +51,7 @@ class PipeType {
     this.tileProps.on_build = function(tile) {
       //initialize tile data
       tile.data.pipe_config = new PipeConfig();
-      tile.data.pipe_state = new PipeConfig(tile.type.props.machine_type);
+      tile.data.pipe_state = new PipeState(tile.type.props.machine_type);
       
       registerPipeInstance(tile);
     };
@@ -70,6 +74,8 @@ class PipeType {
     this.removeSpeed = this.tileProps.build_speed;
     
     this.props = Object.assign({}, props);
+    
+    this.materialCategory = materialCategory;
   }
   
   consumeOutput(tile, tileTo, material, amount) {
@@ -83,14 +89,19 @@ class PipeType {
       //TODO: fail if falloff == 0
       var newOR = falloff * or;
       
+      var usedAmount = 0;
       if(amount >= newOR) {
         m[i].tile.type.props.machine_type.consumeOutput(m[i].tile, neighborAt(m[i].tile, m[i].side), material, or);
         amount -= newOR;
+        usedAmount = or;
       } else {
         var toConsume = amount * (1 / falloff);
         m[i].tile.type.props.machine_type.consumeOutput(m[i].tile, neighborAt(m[i].tile, m[i].side), material, toConsume);
         amount = 0;
+        usedAmount = toConsume;
       }
+      
+      tile.data.pipe_state.reqs.push({src: m[i].tile, dest: tileTo, material: material, amount: usedAmount, falloff: falloff, data: m[i]});
       
       if(amount <= 0) { break; }
     }
@@ -115,8 +126,8 @@ class PipeType {
     return avail;
   }
   
-  crawlNetwork(startTile, material=null) {
-    var toVisit = [{tile: startTile, visited: false, distance: 0}];
+  tilesInNetwork(startTile) {
+    var toVisit = [{tile: startTile, visited: false, distance: 0, path: []}];
     var i = 0;
     while(i < toVisit.length) {
       var tile = toVisit[i].tile;
@@ -128,11 +139,16 @@ class PipeType {
         if(!adj.type.props.is_pipe) { continue; }
         
         if(!adj.data.pipe_config.connections[oppositeDir(dirs[n])]) { continue; }
+        if(adj.type.props.machine_type != tile.type.props.machine_type) { continue; }
+        
+        var newPath = toVisit[i].path.slice();
+        newPath.push(toVisit[i].tile);
         
         var found = false;
         for(var x = 0; x < toVisit.length; x++) {
           if(toVisit[x].tile == adj) {
             toVisit[x].distance = Math.min(toVisit[x].distance, toVisit[i].distance + 1);
+            toVisit[x].path = newPath;
             found = true;
             break;
           }
@@ -140,11 +156,17 @@ class PipeType {
         
         if(found) { continue; }
         
-        toVisit.push({tile: adj, visited: false, distance: toVisit[i].distance + 1});
+        toVisit.push({tile: adj, visited: false, distance: toVisit[i].distance + 1, path: newPath});
       }
       toVisit[i].visited = true;
       i++;
     }
+    
+    return toVisit;
+  }
+  
+  crawlNetwork(startTile, material=null) {
+    var toVisit = this.tilesInNetwork(startTile);
     
     var out = [];
     for(var i = 0; i < toVisit.length; i++) {
@@ -152,6 +174,9 @@ class PipeType {
       var dirs = ["top", "bottom", "left", "right"];
       for(var n = 0; n < dirs.length; n++) {
         if(!tile.data.pipe_config.connections[dirs[n]]) { continue; }
+        
+        if(!tile.type.props.machine_type.canPassMaterial(material)) { continue; }
+        
         var adj = neighborAt(tile, dirs[n]);
         if(adj == null) { continue; }
         if(!adj.type.props.is_machine) { continue; }
@@ -160,7 +185,10 @@ class PipeType {
         var trans = adj.data.machine_config_local.adjTransfer[side];
         if(trans.dir != 1 || (material != null && trans.type != material)) { continue; }
         
-        out.push({tile: adj, distance: toVisit[i].distance + 1, side: side});
+        var newPath = toVisit[i].path;
+        newPath.push(toVisit[i].tile);
+        
+        out.push({tile: adj, distance: toVisit[i].distance + 1, side: side, path: newPath});
       }
     }
     
@@ -171,7 +199,7 @@ class PipeType {
     var falloffLow = 1;
     var falloffHigh = 0.5;
     
-    var propFalloff = {density: null, corrosion: null};
+    var propFalloff = {density: null, corrosion: null, energy: null};
     for(var key in propFalloff) {
       if(!(key in type.props) || !(key in materials[material].props)) { continue; }
       var maxAmt = type.props[key].max;
@@ -195,6 +223,26 @@ class PipeType {
     }
     if(count == 0) { return 1; }
     return total / count;
+  }
+  
+  canPassMaterial(material=null) {
+    if(material == null) { return true; }
+    
+    if(this.materialCategory == null) { return true; }
+    
+    var targetC = materials[material].materialCategory;
+    
+    return this.materialCategory.some(r => targetC.includes(r));
+  }
+  
+  //before machines
+  tick1(tile, tscale) {
+    tile.data.pipe_state.reqs = [];
+  }
+  
+  //after machines
+  tick2(tile, tscale) {
+    
   }
 }
 
@@ -226,7 +274,7 @@ class PipeConfig {
 
 class PipeState {
   constructor(type) {
-    
+    this.reqs = [];
   }
   
   clone() {

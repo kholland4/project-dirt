@@ -55,7 +55,7 @@ defineMachine(new MachineType(
 
 defineMachine(new MachineType(
   "mach:L1_stone_brick", "Stone Bricker",
-  {stone_slurry: -1, stone_brick: 0.3}, {stone_slurry: 20, stone_brick: 15},
+  {stone_slurry: -0.5, stone_brick: 0.2}, {stone_slurry: 20, stone_brick: 15},
   new Texture("worker.png"),
   {build_cost: {wood: -8, stone: -1}, build_speed: 0.075}
 ));

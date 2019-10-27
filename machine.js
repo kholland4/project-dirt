@@ -227,6 +227,20 @@ class MachineType {
           }
         }
       }
+      
+      for(var key in storage_used) {
+        var inSources = false;
+        for(var i = 0; i < sources.length; i++) { if(sources[i].type == key) { inSources = true; } }
+        if(inSources) { continue; }
+        
+        var amt = storage_used[key] / tscale;
+        if(amt / reqs_original[key] > min_amount) {
+          var target_rate = min_amount * reqs_original[key];
+          storage_used[key] = target_rate * tscale;
+          
+          reqs[key] = reqs_original[key] - target_rate;
+        }
+      }
     }
     
     //---
@@ -252,10 +266,12 @@ class MachineType {
     
     //consume input from neighboring machines, pipes, etc.
     for(var i = 0; i < sources.length; i++) {
-      sources[i].target.type.props.machine_type.consumeOutput(sources[i].target, tile, sources[i].type, -sources[i].amount);
-      
-      //FIXME - testing, etc.
-      tile.data.machine_state.adjRates[side(tile, sources[i].target)] += sources[i].amount;
+      if(sources[i].amount != 0) {
+        sources[i].target.type.props.machine_type.consumeOutput(sources[i].target, tile, sources[i].type, -sources[i].amount);
+        
+        //FIXME - testing, etc.
+        tile.data.machine_state.adjRates[side(tile, sources[i].target)] += sources[i].amount;
+      }
     }
     
     return min_amount;
